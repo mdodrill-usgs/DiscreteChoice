@@ -12,10 +12,7 @@ data {
   int Nt;              // Number of trips
   int Ns;              // Number of sites
   
-  int idx_ts_ind[Nind]; // index for trip and site of individuals
-  // int trip[Nst];
-  // int site[Nst];
-
+  int idx_ts_ind[Nind];// index for trip and site of individuals
   int u_idx[Nsp];      // Diet
   int u_idx2[Nsp];     // Diet
   int idx[Nspsz];      // Drift
@@ -25,7 +22,8 @@ data {
   int sp_idx2[Nspsz - Nsp];   //Drift new index for each taxa and size bin - 1, for each taxa
   int not_first[Nspsz - Nsp]; //Drift oposite of idx_first
   
-  vector[Nspsz] sz;    // sizes - diet
+  vector[Nspsz] sz;        // sizes - diet
+  vector[Nind] fish_sz;    // centered fork length of fish
   // vector[Nspsz] area;     // area - diet
   // vector[Nsp] c;
   // vector[Nsp-1] delta;
@@ -72,13 +70,16 @@ parameters {
   real<lower = 0> mu_sp_sig_eta;
   
   vector[Nsp-1] sp_int;
-  vector[Nspsz] spsz_eta;
   
+  vector[Nspsz] spsz_eta;
   matrix[Nind, Nspsz]spsz_ind_eta;
+  matrix[Nst,Nspsz]spsz_st_eta;
   
   real<lower = 0>sig_spsz;
   real<lower = 0>sig_spsz_ind;
+  real<lower = 0>sig_spsz_st; 
   
+  real beta_f_sz_int;
   
 }
 
@@ -100,7 +101,7 @@ transformed parameters {
   // matrix[Nst, Nsp] beta_sp; 
   // matrix[Nst, Nsp] fix_beta_sp_st;
   
-  vector[Nsp] beta_sz;
+  real beta_sz;
   vector[Nsp] mu_sp;
   
   // drift ////////////////////////////////////////////
@@ -137,21 +138,17 @@ transformed parameters {
     
   // diet ////////////////////////////////////////////
   
-  for(i in 1:Nsp){
-    // beta_sz[i] = exp(mu_beta_sz + log(c[i]));
-    beta_sz[i] = exp(mu_beta_sz);
-  }
+  beta_sz = exp(mu_beta_sz);
 
   for(i in 1:Nsp - 1){
     mu_sp[i] = sp_int[i];
   }
   mu_sp[7] = 0.0;
   
-  // for(i in 1:Nst){
   for(i in 1:Nind){
     for(k in 1:Nspsz){
-      beta1[i,k] = dot_product(mu_sp, X[k,]) + spsz_eta[k] + dot_product(beta_sz[], X[k,]) * (log(sz[k]) - avg_log_len) +
-      spsz_ind_eta[i,k];
+      beta1[i,k] = dot_product(mu_sp, X[k,]) + spsz_eta[k] + beta_sz * (log(sz[k]) - avg_log_len) +
+      spsz_ind_eta[i,k] + spsz_st_eta[idx_ts_ind[i],k] + beta_f_sz_int * fish_sz[i] * (log(sz[k]) - avg_log_len);
     }  
   }
   
@@ -194,6 +191,8 @@ model {
   }
   
    // diet ////////////////////////////////////////////
+   
+   beta_f_sz_int ~ normal(0,10);
    sig_sp ~ normal(0, 10);
    
    sig_spsz ~ normal(0,10);
@@ -206,6 +205,14 @@ model {
    for(i in 1:Nind){
      for(k in 1:Nspsz){
        spsz_ind_eta[i,k] ~ normal(0, sig_spsz_ind);
+     }
+   }
+   
+   sig_spsz_st ~ normal(0, 10);
+   
+   for(i in 1:Nst){
+     for(k in 1:Nspsz){
+       spsz_st_eta[i,k] ~ normal(0, sig_spsz_st);
      }
    }
    
