@@ -1,8 +1,6 @@
 // 01/31/2019  :( :( :(
 // * The prior version of this was Model_7_V4.stan (in STAN_Mod_7 folder)
 
-// * this version includes...
-
 data {
   int Nspsz;           // Number of taxa & size bins      
   int Nst;             // Number of sites & trips
@@ -24,23 +22,15 @@ data {
   
   vector[Nspsz] sz;        // sizes - diet
   vector[Nind] fish_sz;    // centered fork length of fish
-  // vector[Nspsz] area;     // area - diet
-  // vector[Nsp] c;
-  // vector[Nsp-1] delta;
   real avg_log_len;
-  
-  // vector[Neqsz] eq_dist;  // equal size dist
-  // int eq_sp[Neqsz];       // new species key with only 1 - 8 bins for each
-  // int eq_sz[Neqsz];       // new size key with only 1 - 8 bins for each
-  // real eq_log_len;
   
   int y[Nind, Nspsz];      // diet matrix 
   int w[Nind, Nsp];        // diet matrix - extra
-  matrix[Nspsz, Nsp] X;   // dummy
+  matrix[Nspsz, Nsp] X;    // dummy
   
-  int a[Nst, Nspsz];      // drift matrix
-  int w_a[Nst, Nsp];      // drift matrix - extra
-  vector[Nsp] emp_a;      // empirical proportions of taxa in the drift (across all samples)
+  int a[Nst, Nspsz];       // drift matrix
+  int w_a[Nst, Nsp];       // drift matrix - extra
+  vector[Nsp] emp_a;       // empirical proportions of taxa in the drift (across all samples)
   int sp[Nspsz];
   
   vector<lower = 0> [Nsp]alpha;  // dirichlet params 
@@ -55,17 +45,9 @@ parameters {
   simplex[Nsp] tmp_ps_a[Nst];
   
   // Diet
-  // vector[1] mu_mu_sp;
-  // vector[Nsp-1] l_mu_sp_eta;
-  
   vector<lower = 0>[Nsp-1] sig_sp;
-  // matrix[Nst, Nsp-1] beta_sp_st;
   
   real mu_beta_sz;
-  // vector[Nsp] l_beta_sz_eta;
-  
-  // vector[Nspsz] eta;
-  // vector<lower = 0>[Nsp] sig_eta;
   real<lower = 0> sz_sig_eta;
   real<lower = 0> mu_sp_sig_eta;
   
@@ -98,8 +80,6 @@ transformed parameters {
   matrix[Nind, Nspsz] beta1;
   matrix[Nind, Nspsz] eprod_u;
   vector[Nind] sum_eprod_u;
-  // matrix[Nst, Nsp] beta_sp; 
-  // matrix[Nst, Nsp] fix_beta_sp_st;
   
   real beta_sz;
   vector[Nsp] mu_sp;
@@ -191,7 +171,6 @@ model {
   }
   
    // diet ////////////////////////////////////////////
-   
    beta_f_sz_int ~ normal(0,10);
    sig_sp ~ normal(0, 10);
    
@@ -235,13 +214,13 @@ generated quantities {
   vector[Nsp] sig_sp_tmp;
 
   // Calculating 'gamma' 
-  // vector[Nspsz] mu_lprod_all;
-  // vector[Nspsz] tmp_sum;
-  // vector[Nspsz] n_tmp_sum;
-  // vector[Nspsz] new_avail;
-  // vector[Nspsz] new_tmp;
-  // vector[Nsp] new_tmp_sum;
-  // vector[Nsp] gamma;
+  vector[Nspsz] mu_lprod_all;
+  vector[Nspsz] tmp_sum;
+  vector[Nspsz] n_tmp_sum;
+  vector[Nspsz] new_avail;
+  vector[Nspsz] new_tmp;
+  vector[Nsp] new_tmp_sum;
+  vector[Nsp] gamma;
   
   // R^2
   // real vRE;
@@ -291,43 +270,44 @@ generated quantities {
 //   // ----------------------------------- //
 // calculate 'gamma' 
   // fill in the zeros for this
-  // for(i in 1:Nsp){
-  //   mu_lprod_all[idx_first[i]] = 1;
-  // }
+  for(i in 1:Nsp){
+    mu_lprod_all[idx_first[i]] = 1;
+  }
 
   // fill in the values of mu_lprod
-  // for(i in 1:Nspsz - Nsp){
-  //   mu_lprod_all[not_first[i]] = exp(mu_lprod[i]);
-  // }
+  for(i in 1:Nspsz - Nsp){
+    mu_lprod_all[not_first[i]] = exp(mu_lprod[i]);
+  }
 
   // sums for each taxa
-  // for(i in 1:Nspsz){
-  //   tmp_sum[i] = sum(mu_lprod_all[idx[i]:idx2[i]]);
-  // }
+  for(i in 1:Nspsz){
+    tmp_sum[i] = sum(mu_lprod_all[idx[i]:idx2[i]]);
+  }
 
   // sums to 1 within taxa
-  // for(i in 1:Nspsz){
-  //   n_tmp_sum[i] = mu_lprod_all[i] / tmp_sum[i];
-  // }
-// 
+  for(i in 1:Nspsz){
+    n_tmp_sum[i] = mu_lprod_all[i] / tmp_sum[i];
+  }
+
 // scale by empirical proportions obs. in drift.
 // this vector sums to 1
-  // for(i in 1:Nspsz){
-  //   new_avail[i] = n_tmp_sum[i] * emp_a[sp[i]];
-  // }
+  for(i in 1:Nspsz){
+    new_avail[i] = n_tmp_sum[i] * emp_a[sp[i]];
+  }
 
 // should this be mu_sp_all? (it doesn't matter, mu_sp_all or mu_sp_tmp) Add the st deviates in?
-  // for(i in 1:Nspsz){
-  //   new_tmp[i] = new_avail[i] * exp(mu_sp_all[sp[i]] + spsz_eta[i] + beta_sz[sp[i]] * (log(sz[i]) - avg_log_len));
-  // }
-  // 
-  // for(i in 1:Nsp){
-  //   new_tmp_sum[i] = sum(new_tmp[u_idx[i]:u_idx2[i]]);
-  // }
-  // 
-  // for(i in 1:Nsp){
-  //   gamma[i] = new_tmp_sum[i] / sum(new_tmp_sum[]);
-  // }
+  for(i in 1:Nspsz){
+    new_tmp[i] = new_avail[i] * exp(mu_sp_all[sp[i]] + spsz_eta[i] + beta_sz * (log(sz[i]) - avg_log_len));
+  }
+  
+  for(i in 1:Nsp){
+    new_tmp_sum[i] = sum(new_tmp[u_idx[i]:u_idx2[i]]);
+  }
+
+  for(i in 1:Nsp){
+    gamma[i] = new_tmp_sum[i] / sum(new_tmp_sum[]);
+  }
+  
 // ----------------------------------- //
 // multi-level R^2                                    ---> Need to change indexing to ind for spsz_ind_eta !!!
     // vRE_1 = variance(spsz_eta[]);
@@ -412,15 +392,4 @@ generated quantities {
 //     gamma_sz[i] = new_tmp_sum2[i] / sum(new_tmp_sum2[]);
 //   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
