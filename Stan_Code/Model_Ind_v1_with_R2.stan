@@ -223,14 +223,14 @@ generated quantities {
   vector[Nsp] gamma;
   
   // R^2
-  real vRE;
+  real vRE_sp_psz_fsz;
   row_vector[Nspsz] tmp_sp_sz_eta;
   matrix[Nind, Nspsz] tmp_vRE;
+  real vRE;
   matrix[Nind, Nspsz] tmp_vRE_sp;
   real vRE_sp;
-  real vRE_sp_fsz;
   matrix[Nind, Nspsz] tmp_vRE_sp_fsz;
-  real vRE_sp_psz_fsz;
+  real vRE_sp_fsz;
   
   // Calculate the transformed intercepts & their sd
   mu_sp_tmp[Nsp] = 0.0;
@@ -253,32 +253,32 @@ generated quantities {
     mu_lprod_all[idx_first[i]] = 1;
   }
 
-  // fill in the values of mu_lprod
+  // // fill in the values of mu_lprod
   for(i in 1:Nspsz - Nsp){
     mu_lprod_all[not_first[i]] = exp(mu_lprod[i]);
   }
 
-  // sums for each taxa
+  // // sums for each taxa
   for(i in 1:Nspsz){
     tmp_sum[i] = sum(mu_lprod_all[idx[i]:idx2[i]]);
   }
 
-  // sums to 1 within taxa
+  // // sums to 1 within taxa
   for(i in 1:Nspsz){
     n_tmp_sum[i] = mu_lprod_all[i] / tmp_sum[i];
   }
 
-  // scale by empirical proportions obs. in drift.
-  // this vector sums to 1
+  // // scale by empirical proportions obs. in drift.
+  // // this vector sums to 1
   for(i in 1:Nspsz){
     new_avail[i] = n_tmp_sum[i] * emp_a[sp[i]];
   }
 
-  // should this be mu_sp_all? (it doesn't matter, mu_sp_all or mu_sp_tmp) Add the st deviates in?
+  // // should this be mu_sp_all? (it doesn't matter, mu_sp_all or mu_sp_tmp) Add the st deviates in?
   for(i in 1:Nspsz){
     new_tmp[i] = new_avail[i] * exp(mu_sp_all[sp[i]] + spsz_eta[i] + beta_sz * (log(sz[i]) - avg_log_len));
   }
-  
+
   for(i in 1:Nsp){
     new_tmp_sum[i] = sum(new_tmp[u_idx[i]:u_idx2[i]]);
   }
@@ -290,27 +290,29 @@ generated quantities {
   // ----------------------------------- //
   // multi-level R^2                                  
   vRE_sp_psz_fsz = variance(beta1[]);
-  
+
   for(i in 1:Nspsz){
     tmp_sp_sz_eta[i] = spsz_eta[i];  //convert this to a row vector
   }
-  
+
   for(i in 1:Nind){
       tmp_vRE[i,] = tmp_sp_sz_eta[] + spsz_st_eta[idx_ts_ind[i],] + spsz_ind_eta[i,];
   }
-  
+
   vRE = variance(tmp_vRE[]);
-  
+
   for(k in 1:Nspsz){
     tmp_vRE_sp[,k] = tmp_vRE[,k] + dot_product(mu_sp, X[k,]);
-    tmp_vRE_sp_fsz[,k] = tmp_vRE[,k] + dot_product(mu_sp, X[k,]) + beta_f_sz_int * fish_sz * (log(sz[k]) - avg_log_len);
   }
   
   vRE_sp = variance(tmp_vRE_sp[]);
   
+  for(i in 1:Nind){
+    for(k in 1:Nspsz){
+      tmp_vRE_sp_fsz[i,k] = tmp_vRE[i,k] + dot_product(mu_sp, X[k,]) + beta_f_sz_int * fish_sz[i] * (log(sz[k]) - avg_log_len);
+    }
+  }
+
   vRE_sp_fsz = variance(tmp_vRE_sp_fsz[]);
     
-// ----------------------------------- //
-
 }
-
