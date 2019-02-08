@@ -1,4 +1,4 @@
-// 01/31/2019  :( :( :(
+// Feb 2019
 // * The prior version of this was Model_7_V4.stan (in STAN_Mod_7 folder)
 
 data {
@@ -222,30 +222,6 @@ generated quantities {
   vector[Nsp] new_tmp_sum;
   vector[Nsp] gamma;
   
-  // R^2
-  // real vRE;
-  // real vRE_1;
-  // real vRE_2;
-  // row_vector[Nspsz] tmp_sp_sz_eta;
-  // matrix[Nst,Nspsz] tmp_vRE;
-  // matrix[Nst,Nspsz] tmp_vRE_sp;
-  // real vRE_sp;
-  // matrix[Nst,Nspsz] tmp_vRE_sz;
-  // real vRE_sz;
-  // matrix[Nst,Nspsz] tmp_vRE_sp_sz;
-  // real vRE_sp_sz;
-//   
-//   // Other2 
-//   matrix[Nst, Nspsz] tmp_st;
-//   matrix[Nst, Nsp] tmp_st_sum;
-//   matrix[Nst, Nsp] gamma_st;
-//   matrix[Nst, Nsp] ratio_st; 
-//   
-//   // Other 3
-//   vector[Neqsz] new_tmp2;
-//   vector[Nsp] new_tmp_sum2;
-//   vector[Nsp] gamma_sz;
-//   
   // Calculate the transformed intercepts & their sd
   mu_sp_tmp[Nsp] = 0.0;
   sig_sp_tmp[Nsp] = 0.0;
@@ -260,15 +236,7 @@ generated quantities {
     sig_sp_all[i] = sig_sp_tmp[i] - mean(sig_sp_tmp[]);
   }
   
-//   
-//   // Calculate the site and trip effects (intercepts)
-//   for(i in 1:Nst){
-//     for(j in 1:Nsp){
-//       beta_sp_st_all[i,j] = fix_beta_sp_st[i,j] - mean(fix_beta_sp_st[i,]);
-//     }
-//   }
-//   // ----------------------------------- //
-// calculate 'gamma' 
+  // calculate 'gamma' 
   // fill in the zeros for this
   for(i in 1:Nsp){
     mu_lprod_all[idx_first[i]] = 1;
@@ -308,88 +276,5 @@ generated quantities {
     gamma[i] = new_tmp_sum[i] / sum(new_tmp_sum[]);
   }
   
-// ----------------------------------- //
-// multi-level R^2                                    ---> Need to change indexing to ind for spsz_ind_eta !!!
-    // vRE_1 = variance(spsz_eta[]);
-    // vRE_2 = variance(spsz_ind_eta[]);
-    // 
-    // for(i in 1:Nspsz){
-    //   tmp_sp_sz_eta[i] = spsz_eta[i];  //convert this to a row vector
-    // }
-    // 
-    // for(i in 1:Nst){
-    //   tmp_vRE[i,] = tmp_sp_sz_eta[] + spsz_ind_eta[i,];
-    // }
-    // 
-    // vRE = variance(tmp_vRE[]);
-    // 
-    // ///////
-    // for(i in 1:Nst){
-    //   for(k in 1:Nspsz){
-    //     tmp_vRE_sp[i,k] = dot_product(mu_sp, X[k,]) + spsz_eta[k] + spsz_ind_eta[i,k];
-    //   }
-    // }
-    // 
-    // vRE_sp = variance(tmp_vRE_sp[]);
-    // 
-    // ///////
-    // for(i in 1:Nst){
-    //   for(k in 1:Nspsz){
-    //     tmp_vRE_sz[i,k] = dot_product(beta_sz[], X[k,]) * (log(sz[k]) - avg_log_len) + spsz_eta[k] + spsz_ind_eta[i,k];
-    //   }
-    // }
-    // 
-    // vRE_sz = variance(tmp_vRE_sz[]);
-    // 
-    // ///////
-    // for(i in 1:Nst){
-    //   for(k in 1:Nspsz){
-    //     tmp_vRE_sp_sz[i,k] = dot_product(mu_sp, X[k,]) + dot_product(beta_sz[], X[k,])  * (log(sz[k]) - avg_log_len) + 
-    //     spsz_eta[k] + spsz_ind_eta[i,k];
-    //   }
-    // }
-    // 
-    // vRE_sp_sz = variance(tmp_vRE_sp_sz[]);
-    
-// ----------------------------------- //
-//  
-//   for(j in 1:Nspsz){
-//     for(i in 1:Nst){
-//        tmp_st[i,j] = p_a[i,j] * exp(fix_beta_sp_st[i,sp[j]] + beta_sz[sp[j]] * (log(sz[i]) - avg_log_len));
-//        // tmp_st[i,j] = p_a[i,j] * exp(fix_beta_sp_st[i,sp[j]] + beta_sz[sp[j]] * log(sz[j]));
-//     }
-//   }
-//   
-//   for(i in 1:Nst){
-//     for(j in 1:Nsp){
-//       tmp_st_sum[i,j] = sum(tmp_st[i,u_idx[j]:u_idx2[j]]);
-//     }
-//   }
-//   
-//   for(i in 1:Nst){
-//     for(j in 1:Nsp){
-//       gamma_st[i,j] = tmp_st_sum[i,j] / sum(tmp_st_sum[i,]);
-//     }
-//   }
-//   
-//   for(i in 1:Nst){
-//     for(j in 1:Nsp){
-//       ratio_st[i,j] = gamma_st[i,j] / ps_a[i,j];
-//     }
-//   }
-//   
-//   // ----------------------------------- //
-//   // Isolate the effect of prey size
-//   for(i in 1:Neqsz){
-//      new_tmp2[i] = eq_dist[i] * exp(mu_sp_tmp[eq_sp[i]] + beta_sz[eq_sp[i]] * (log(eq_sz[i]) - eq_log_len));
-//   }
-//   
-//     for(i in 1:Nsp){
-//     new_tmp_sum2[i] = sum(new_tmp2[((i-1)*7)+1:i*7]);
-//   }
-//   
-//   for(i in 1:Nsp){
-//     gamma_sz[i] = new_tmp_sum2[i] / sum(new_tmp_sum2[]);
-//   }
 }
 
