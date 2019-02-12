@@ -151,65 +151,7 @@ model.set.up = function(model.name = NULL){
     # emp.dat2 = data.frame(taxa = name.key$name,
     #                       emp = emp_a_2)
     #-----------------------------------------------------------------------------#
-    # create a vector with the same size distribution between bins (the overall size
-    # dist), but with the same relative diff in abudance between taxa (bunch of code
-    # for this --> clean up)
-    
-    # sum the over 8mm into one bin
-    dat = data.frame(spp = spp,
-                     sz = sz,
-                     sums = colSums(A))
-    
-    out = expand.grid(spp = unique(spp), sz = 2:8)
-    out = out[order(out$spp),]
-    out$count = 0
-    
-    big.out = NULL
-    
-    for(i in 1:Nsp){
-      sub = dat[which(dat$spp == i),]
-      out.s = out[which(out$spp == i),]
-      
-      out.s[1:6,3] = sub$sums[1:6]
-      
-      if(nrow(sub) >= 7){
-        out.s[7,3] = sum(sub$sums[7:nrow(sub)])
-      }
-      big.out[[i]] = out.s
-    }
-    
-    out2 = do.call('rbind', big.out)
-    
-    # get the overall size distribution, across taxa
-    dist = group_by(out2, sz) %>%
-      summarize(my.sum = sum(count))
-    
-    dist$prop = dist$my.sum / sum(dist$my.sum)
-    
-    # total count and prop for each taxa
-    tot.ct = group_by(out2, spp) %>%
-      summarize(tot = sum(count))
-    tot.ct$prop = tot.ct$tot / sum(tot.ct$tot)
-    
-    out3 = list()
-    
-    for(i in 1:Nsp){
-      out3[[i]] = dist$prop * tot.ct$prop[i]
-    }
-    
-    out4 = do.call(c, out3)
-    sum(out4)
-    
-    eq_dist = out4
-    eq_sp = out2$spp
-    eq_sz = out2$sz
-    Neqsz = dim(out)[1]
-    
-    eq_log_len = mean(log(eq_sz))
-    
-    #-----------------------------------------------------------------------------#
     if(model.name == "Width"){
-      #-----------------------------------------------------------------------------#
       # width calc (see C:\Users\mdodrill\Desktop\FB_DOWN\Analysis\IMAGE\Image_V2.R)
       # wrote using 'dput' on 'out.w'
       
@@ -245,7 +187,7 @@ model.set.up = function(model.name = NULL){
         
         tmp.ar = sub[,2] + sub[,3] * log(tmp.sz)
         
-        del[i] = sub[,2] + sub[,3] * avg.log.measure  #log area for average size
+        # del[i] = sub[,2] + sub[,3] * avg.log.measure  #log area for average size
         
         tmp.ar2[[i]] = exp(tmp.ar)
         
@@ -296,7 +238,7 @@ model.set.up = function(model.name = NULL){
         
         tmp.ar = sub[,2] + sub[,3] * log(tmp.sz)
         
-        del[i] = sub[,2] + sub[,3] * avg.log.measure  #log area for average size
+        # del[i] = sub[,2] + sub[,3] * avg.log.measure  #log area for average size
         
         tmp.ar2[[i]] = exp(tmp.ar)
         
@@ -314,6 +256,12 @@ model.set.up = function(model.name = NULL){
     #-----------------------------------------------------------------------------#
     if(model.name == "Mass"){
       # estimate mass (see foodbase package species list for regression parameters)
+      # species list to estimate biomass
+      sp.tmp = read.table(paste0(getwd(), "/Data/SpeciesList_2019_02_07.txt"), sep = "\t", header = TRUE)
+      
+      sp.tmp.2 = sp.tmp[which(sp.tmp$SpeciesID %in% c("CHIL", "CHIA", "SIML", "SIMA",
+                                                      "GAMM", "NZMS", "OLIG")),]
+      sp.tmp.3 = sp.tmp.2[,which(names(sp.tmp.2) %in% c("SpeciesID", "RegressionA", "RegressionB"))]
       
       sp.key = data.frame(num = c(2,4,5,7,19,21,1),
                           name = c("NZMS", "GAMM", "SIMA", "SIML", "CHIA", "CHIL", "OLIG"))
@@ -330,8 +278,9 @@ model.set.up = function(model.name = NULL){
         
       }
       
+      # mass
       measure = do.call(c,out.list)
-      avg.log.measure = mean(log(mass))
+      avg.log.measure = mean(log(measure))
       
       # check / look at regressions
       # test = as.data.frame(cbind(sz, as.factor(spp), mass))
@@ -358,7 +307,7 @@ model.set.up = function(model.name = NULL){
       measure = sz
     }
     
-    data.in = list(Nspsz = Nspsz, Nst = Nst, Nsp = Nsp, Neqsz = Neqsz, Nind = Nind,
+    data.in = list(Nspsz = Nspsz, Nst = Nst, Nsp = Nsp, Nind = Nind,
                    sp = spp, sp_idx2 = spp2, spsz = spsz,
                    a = A, w_a = w.a, y = y.in, w = w.in,
                    idx = idx, idx2 = idx2, idx_first = idx_first, not_first = not_first,
