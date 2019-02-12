@@ -5,10 +5,7 @@ data {
   int Nspsz;           // Number of taxa & size bins      
   int Nst;             // Number of sites & trips
   int Nsp;             // Number of taxa
-  int Neqsz;           // Number of equal size bins (7) * Nsp
   int Nind;            // Number of individuals
-  int Nt;              // Number of trips
-  int Ns;              // Number of sites
   
   int idx_ts_ind[Nind];// index for trip and site of individuals
   int u_idx[Nsp];      // Diet
