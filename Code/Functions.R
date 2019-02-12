@@ -25,7 +25,10 @@ model.set.up = function(model.name = NULL){
     # only by taxa, not size
     tmp.A.w = read.table(paste0(getwd(), "/Data/Drift_A_w.txt"), sep = "\t", header = TRUE)
     
-    identical(tmp.A[,1:2], tmp.A.w[,1:2]) # these should match
+    # these should match
+    if(identical(tmp.A[,1:2], tmp.A.w[,1:2]) == FALSE){
+      message("Stop - Problem with the data")
+    }
     #-----------------------------------------------------------------------------#
     # read in the diet data
     
@@ -35,7 +38,10 @@ model.set.up = function(model.name = NULL){
     # only by taxa, not size
     w.tmp2 = read.table(paste0(getwd(), "/Data/Diet_w.txt"), sep = "\t", header = TRUE)
     
-    identical(y.tmp2[,1:3], w.tmp2[,1:3]) # these should match
+    # these should match
+    if(identical(y.tmp2[,1:3], w.tmp2[,1:3]) == FALSE){
+      message("Stop - Problem with the data")
+    } 
     #-----------------------------------------------------------------------------#
     # format/match/check data
     
@@ -51,7 +57,9 @@ model.set.up = function(model.name = NULL){
     y.tmp = y.tmp2[order(paste(y.tmp2[,1], y.tmp2[,2])),]
     w.tmp = w.tmp2[order(paste(w.tmp2[,1], w.tmp2[,2])),]
     
-    identical(y.tmp[,1:3], w.tmp[,1:3])
+    if(identical(y.tmp[,1:3], w.tmp[,1:3]) == FALSE){
+      message("Stop - Problem with the data")
+    }
     y.in = as.matrix(y.tmp[,6:ncol(y.tmp)])
     w.in = as.matrix(w.tmp[,4:ncol(w.tmp)])
     
@@ -69,7 +77,7 @@ model.set.up = function(model.name = NULL){
     # new varible for the fixed paramaters in the drift portion of the model 
     spp2 = sort(as.numeric(rep(c(1:Nsp), upper-1)))
     
-    # fix all this shit...........
+    # better way to do this? 
     idx = c(rep(1, upper[1]),
             rep(upper[1] + 1, upper[2]),
             rep(upper[1] + upper[2] + 1, upper[3]),
@@ -86,10 +94,9 @@ model.set.up = function(model.name = NULL){
              rep(upper[1] + upper[2] + upper[3] + upper[4] + upper[5] + upper[6], upper[6]),
              rep(upper[1] + upper[2] + upper[3] + upper[4] + upper[5] + upper[6] + upper[7], upper[7]))
     
-    # better way to do this? 
     out = NULL
     for(i in 1:Nsp){
-      out[[i]] = seq(2,upper[i] + 1)  
+      out[[i]] = seq(2, upper[i] + 1)  
     }
     
     sz = do.call(c,out)
@@ -104,7 +111,7 @@ model.set.up = function(model.name = NULL){
     site = as.numeric(y.tmp[,2])
     
     #-----------------------------------------------------------------------------#
-    # fish size covariate
+    # fish size covariate (one sample has no size, set to the mean)
     t.sz = y.tmp[,4] 
     
     t.sz[which(t.sz == 2287)] = NA
@@ -113,6 +120,22 @@ model.set.up = function(model.name = NULL){
     
     fish_sz[is.na(fish_sz)] = 0
     
+    #-----------------------------------------------------------------------------#
+    # need emp_a (drift prop for each taxa across all the data)
+    tmp.a = data.frame(spp = spp,
+                       sums = colSums(A))
+    
+    tmp.a.2 = group_by(tmp.a, spp) %>%
+      summarize(my.sum = sum(sums))
+    
+    a.tmp.w = colSums(w.a)
+    
+    tmp.a.all = tmp.a.2$my.sum + a.tmp.w
+    
+    emp_a_2 = tmp.a.all / sum(tmp.a.all)
+    
+    # emp.dat2 = data.frame(taxa = name.key$name,
+    #                       emp = emp_a_2)
     #-----------------------------------------------------------------------------#
     if(model.name == "Length"){
       # calc the average size of prey in the drift (probably a better way :/)
@@ -133,23 +156,6 @@ model.set.up = function(model.name = NULL){
       avg.log.measure = mean(log(as.numeric(all.len)))
     }
     
-    
-    #-----------------------------------------------------------------------------#
-    # need emp_a (drift prop for each taxa across all the data)
-    tmp.a = data.frame(spp = spp,
-                       sums = colSums(A))
-    
-    tmp.a.2 = group_by(tmp.a, spp) %>%
-      summarize(my.sum = sum(sums))
-    
-    a.tmp.w = colSums(w.a)
-    
-    tmp.a.all = tmp.a.2$my.sum + a.tmp.w
-    
-    emp_a_2 = tmp.a.all / sum(tmp.a.all)
-    
-    # emp.dat2 = data.frame(taxa = name.key$name,
-    #                       emp = emp_a_2)
     #-----------------------------------------------------------------------------#
     if(model.name == "Width"){
       # width calc (see C:\Users\mdodrill\Desktop\FB_DOWN\Analysis\IMAGE\Image_V2.R)
@@ -201,7 +207,7 @@ model.set.up = function(model.name = NULL){
       avg.log.measure = mean(log(dat.width$width))
       measure = dat.width$width
     }
-    
+    #-----------------------------------------------------------------------------#
     if(model.name == "Area"){
       # area calc (see C:\Users\mdodrill\Desktop\FB_DOWN\Analysis\IMAGE\Image_V2.R)
       # wrote using 'dput'
@@ -294,8 +300,10 @@ model.set.up = function(model.name = NULL){
       #-----------------------------------------------------------------------------#  
     }
     
+    # dirichlet params 
     alpha = rep(.2, Nsp)
     
+    # dummy matrix
     X <- as.matrix(model.matrix(~ as.factor(spp) - 1))   
     
     idx_first = unique(idx)  # position of the first bin for each taxa
