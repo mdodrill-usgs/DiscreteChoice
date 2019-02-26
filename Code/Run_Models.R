@@ -8,6 +8,7 @@
 #    - changes to formatter, and subsequent code
 #  * 
 #  * Added multi-level R2 to the model
+#  * Latest version has no worms
 #
 ###############################################################################
 rm(list = ls(all = TRUE))
@@ -26,7 +27,8 @@ source(paste0(getwd(),"/Code/Functions.R"))
 
 #-----------------------------------------------------------------------------#
 # length
-data.in = model.set.up(model.name = "Length")
+# data.in = model.set.up(model.name = "Length")
+data.in = model.set.up.no.worms(model.name = "Length")
 
 list2env(data.in, globalenv())
 
@@ -37,17 +39,15 @@ params <- c("beta_sz", "mu_sp", "sig_sp",  # the paramaters
             "n_eprod_a",# "n_tmp_sum",
             # "p", "p_a",
             "vRE", "vRE_sp", "vRE_sp_fsz", "vRE_sp_psz_fsz", # R^2 parms
-            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", #"spsz_eta", "spsz_ind_eta",
+            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", 
+            "spsz_eta", "spsz_st_eta", "spsz_ind_eta",
             "beta_f_sz_int")
 
 
-# ni = 2000
-ni = 10
+ni = 2000
 nt = 1
-# nb = 1000
-nb = 5
-# nc = 3
-nc = 1
+nb = 1000
+nc = 3
 
 Sys.time()
 
@@ -60,11 +60,12 @@ fit <- sampling(m, data = data.in,
 
 
 
-# save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_ADDNAME.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Length_2000iter_with_All_RE.RData")
 
 #-----------------------------------------------------------------------------#
 # Width
-data.in = model.set.up(model.name = "Width")
+# data.in = model.set.up(model.name = "Width")
+data.in = model.set.up.no.worms(model.name = "Width")
 
 list2env(data.in, globalenv())
 
@@ -75,17 +76,15 @@ params <- c("beta_sz", "mu_sp", "sig_sp",  # the paramaters
             "n_eprod_a",# "n_tmp_sum",
             # "p", "p_a",
             "vRE", "vRE_sp", "vRE_sp_fsz", "vRE_sp_psz_fsz", # R^2 parms
-            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", #"spsz_eta", "spsz_ind_eta",
+            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", 
+            "spsz_eta", "spsz_st_eta", "spsz_ind_eta",
             "beta_f_sz_int")
 
 
-# ni = 2000
-ni = 10
+ni = 2000
 nt = 1
-# nb = 1000
-nb = 5
-# nc = 3
-nc = 1
+nb = 1000
+nc = 3
 
 Sys.time()
 
@@ -96,12 +95,13 @@ fit <- sampling(m, data = data.in,
                 # control = list(max_treedepth = 14, adapt_delta = .925),
                 chains = nc, thin = nt, iter = ni, warmup = nb)
 
-# save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_ADDNAME.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Width_2000iter_with_All_RE.RData")
 
 
 #-----------------------------------------------------------------------------#
 # Area
-data.in = model.set.up(model.name = "Area")
+# data.in = model.set.up(model.name = "Area")
+data.in = model.set.up.no.worms(model.name = "Area")
 
 list2env(data.in, globalenv())
 
@@ -112,17 +112,14 @@ params <- c("beta_sz", "mu_sp", "sig_sp",  # the paramaters
             "n_eprod_a",# "n_tmp_sum",
             # "p", "p_a",
             "vRE", "vRE_sp", "vRE_sp_fsz", "vRE_sp_psz_fsz", # R^2 parms
-            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", #"spsz_eta", "spsz_ind_eta",
+            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", 
+            "spsz_eta", "spsz_st_eta", "spsz_ind_eta",
             "beta_f_sz_int")
 
-
-# ni = 2000
-ni = 10
+ni = 2000
 nt = 1
-# nb = 1000
-nb = 5
-# nc = 3
-nc = 1
+nb = 1000
+nc = 3
 
 Sys.time()
 
@@ -133,12 +130,13 @@ fit <- sampling(m, data = data.in,
                 # control = list(max_treedepth = 14, adapt_delta = .925),
                 chains = nc, thin = nt, iter = ni, warmup = nb)
 
-# save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_ADDNAME.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Area_2000iter_with_All_RE.RData")
 
 
 #-----------------------------------------------------------------------------#
 # Mass
-data.in = model.set.up(model.name = "Mass")
+# data.in = model.set.up(model.name = "Mass")
+data.in = model.set.up.no.worms(model.name = "Mass")
 
 list2env(data.in, globalenv())
 
@@ -149,17 +147,15 @@ params <- c("beta_sz", "mu_sp", "sig_sp",  # the paramaters
             "n_eprod_a",# "n_tmp_sum",
             # "p", "p_a",
             "vRE", "vRE_sp", "vRE_sp_fsz", "vRE_sp_psz_fsz", # R^2 parms
-            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", #"spsz_eta", "spsz_ind_eta",
+            "mu_beta_sz", "sig_spsz", "sig_spsz_ind", "sig_spsz_st", 
+            "spsz_eta", "spsz_st_eta", "spsz_ind_eta",
             "beta_f_sz_int")
 
 
-# ni = 2000
-ni = 10
+ni = 2000
 nt = 1
-# nb = 1000
-nb = 5
-# nc = 3
-nc = 1
+nb = 1000
+nc = 3
 
 Sys.time()
 
@@ -170,7 +166,7 @@ fit <- sampling(m, data = data.in,
                 # control = list(max_treedepth = 14, adapt_delta = .925),
                 chains = nc, thin = nt, iter = ni, warmup = nb)
 
-# save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_ADDNAME.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Mass_2000iter_with_All_RE.RData")
 
 
 #-----------------------------------------------------------------------------#
