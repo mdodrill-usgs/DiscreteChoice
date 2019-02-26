@@ -60,7 +60,7 @@ fit <- sampling(m, data = data.in,
 
 
 
-save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Length_2000iter_with_All_RE.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Length_2000iter_with_All_RE_no_worm.RData")
 
 #-----------------------------------------------------------------------------#
 # Width
@@ -95,7 +95,7 @@ fit <- sampling(m, data = data.in,
                 # control = list(max_treedepth = 14, adapt_delta = .925),
                 chains = nc, thin = nt, iter = ni, warmup = nb)
 
-save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Width_2000iter_with_All_RE.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Width_2000iter_with_All_RE_no_worm.RData")
 
 
 #-----------------------------------------------------------------------------#
@@ -130,7 +130,7 @@ fit <- sampling(m, data = data.in,
                 # control = list(max_treedepth = 14, adapt_delta = .925),
                 chains = nc, thin = nt, iter = ni, warmup = nb)
 
-save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Area_2000iter_with_All_RE.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Area_2000iter_with_All_RE_no_worm.RData")
 
 
 #-----------------------------------------------------------------------------#
@@ -166,7 +166,7 @@ fit <- sampling(m, data = data.in,
                 # control = list(max_treedepth = 14, adapt_delta = .925),
                 chains = nc, thin = nt, iter = ni, warmup = nb)
 
-save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Mass_2000iter_with_All_RE.RData")
+save.image("U:/Desktop/Fish_Git/DiscreteChoice/working_runs/Model_Ind_v1_with_R2_Mass_2000iter_with_All_RE_no_worm.RData")
 
 
 #-----------------------------------------------------------------------------#
