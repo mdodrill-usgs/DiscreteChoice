@@ -120,7 +120,7 @@ transformed parameters {
   for(i in 1:Nsp - 1){
     mu_sp[i] = sp_int[i];
   }
-  mu_sp[7] = 0.0;
+  mu_sp[Nsp] = 0.0;
   
   for(i in 1:Nind){
     for(k in 1:Nspsz){
