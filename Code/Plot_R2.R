@@ -28,7 +28,7 @@ runs = c("Model_Ind_v1_with_R2_Length_2000iter.RData",
          "Model_Ind_v1_with_R2_Width_2000iter.RData",
          "Model_Ind_v1_with_R2_Area_2000iter.RData",
          "Model_Ind_v1_with_R2_Mass_2000iter.RData")
-
+ 
 # 6 taxa models
 runs = c("Model_Ind_v1_with_R2_Length_2000iter_with_All_RE_no_worm.RData",
          "Model_Ind_v1_with_R2_Width_2000iter_with_All_RE_no_worm.RData",
