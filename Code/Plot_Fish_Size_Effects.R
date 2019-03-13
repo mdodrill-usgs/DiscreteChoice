@@ -13,6 +13,8 @@ library(gridExtra)
 library(ggthemes)
 library(ggplot2)
 library(dplyr)
+library(plot3D)
+library(tidyr)
 
 load("Model_Ind_v1_with_R2_Width_2000iter.RData")
 fit.1 = fit
@@ -43,14 +45,9 @@ names = c("Length", "Width", "Area", "Mass")
 outter = list()
 
 for(ii in 1:4){
-  
   load(runs[ii])
   
-  # outter[[ii]] = bayes_summary(fit, par.name = "beta_f_sz_int")  
-  # test =  bayes_summary(fit, par.name = "beta_f_sz_int", transform = "exp")  # this is fucked up, check it out? - Rounding?
   tmp = organize(fit, par.name = "beta_f_sz_int")
-  
-  # tmp$value.2 = exp(tmp$value)
   
   all = group_by(tmp, Parameter) %>%
     summarize(my.mean = mean(exp(value)),
@@ -65,14 +62,12 @@ for(ii in 1:4){
 
 big = do.call(rbind, outter)
 
-
 big$name = factor(big$name, 
                   levels = c("Length", "Width", "Area", "Mass"),
                   ordered = TRUE)
 
 #--------------------------------------
 windows(width = 6.5, height = 5*1.5, record = T, xpos = 25)
-
 
 p = ggplot(big, aes(x = name, y = my.mean)) +
   geom_point(size = 5) +
@@ -82,16 +77,11 @@ p = ggplot(big, aes(x = name, y = my.mean)) +
   annotate("segment", x=-Inf, xend=Inf, y=-Inf, yend=-Inf) +
   annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf) +
   labs(title = "C")
-# theme_base()
-# p
 
 g = p + theme(plot.margin = unit(c(1,1,1,1), "cm"),
               panel.spacing = unit(1, "lines"),
-              # strip.text = element_text(vjust = 2, size = 18, hjust = .5),
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
-              # plot.title = element_text(hjust = .5, vjust = 4, size = 20),
-              # axis.title.x = element_text(size = 18, vjust = -2),
               axis.title.y = element_text(size = 28, vjust = 2),
               axis.ticks = element_line(color = "black"),
               title = element_text(size = 24),
@@ -101,8 +91,6 @@ g
 
 #-----------------------------------------------------------------------------#
 # plotting the mean fish size relationship with some uncertanty...
-# load("Model_Ind_v1_with_R2_Length_1000iter.RData")
-# fit.1 = fit
 
 d = bayes_summary(fit.1, par.name = "beta_f_sz_int")
 a = bayes_summary(fit.1, par.name = "mu_sp_all")
@@ -113,7 +101,7 @@ b.1 = as.numeric(b[1,2])
 d.1 = as.numeric(d[1,2])
 
 size = seq(min(fish_sz), max(fish_sz), 1)
-#--------------------------------------------
+#--------------------------------------
 tmp.1 = organize(fit = fit.1, par.name = "beta_f_sz_int")
 tmp.2 = organize(fit = fit.1, par.name = "beta_sz")
 tmp.2 = tmp.2[tmp.2$Parameter == "beta_sz",]
@@ -142,10 +130,7 @@ for(i in 1:500){
 
 
 all.out = do.call(rbind, out.list)
-# all.out.2 = do.call(rbind, out.list)
-# names(all.out)[4:5] = c("pred_log", "pred")
 
-# mean.tmp = tmp = a.1 + b.1 + d.1 * size
 mean.tmp = tmp = a.1 + b.1 * d.1 * size
 mean.d = data.frame(run = 1,
                     fish_len = size,
@@ -154,11 +139,9 @@ mean.d = data.frame(run = 1,
                     pred = exp(mean.tmp))
 
 
-
+#--------------------------------------
 p3 = ggplot(all.out, aes(x = fish_lab, y = pred, group = run)) +
   geom_line(alpha = .2, color = "gray") +
-  # geom_line(data = all.out.2, aes(x = fish_lab, y = pred, group = run),
-  #           alpha = .2, color = "blue") +
   geom_line(data = mean.d, aes(x = fish_lab, y = pred, group = run),
             color = "black", size = 2) +
   labs(x = "Fork Length (mm)", y = "Selection for Reference \n Prey Type and Size",
@@ -168,15 +151,11 @@ p3 = ggplot(all.out, aes(x = fish_lab, y = pred, group = run)) +
   annotate("segment", x=-Inf, xend=-Inf, y=-Inf, yend=Inf) +
   coord_cartesian(ylim = c(0,300)) +
   labs(title = "B")
-# theme_base()
-# p3
 
 g = p3 + theme(plot.margin = unit(c(1,1,1,1), "cm"),
                panel.spacing = unit(1, "lines"),
-               # strip.text = element_text(vjust = 2, size = 18, hjust = .5),
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
-               # plot.title = element_text(hjust = .5, vjust = 4, size = 20),
                axis.title.y = element_text(size = 28, vjust = 4),
                axis.title.x = element_text(size = 28, vjust = -2),
                title = element_text(size = 24),
@@ -188,27 +167,22 @@ g
 
 #-----------------------------------------------------------------------------#
 # 3D Plot! 
-
-# load("Model_Ind_v1_with_R2_Width_1000iter.RData")
-# fit.1 = fit
+windows(width = 6.5*1.5, height = 5*1.5, record = T, xpos = 25)
 
 d = bayes_summary(fit.1, par.name = "beta_f_sz_int")
 a = bayes_summary(fit.1, par.name = "mu_sp_all")
 b = bayes_summary(fit.1, par.name = "beta_sz")  
 
-a.1 = as.numeric(a[3,2])
+a.1 = as.numeric(a[6,2])  # midge larvae
 b.1 = as.numeric(b[1,2])
 d.1 = as.numeric(d[1,2])
 
 size = seq(min(fish_sz), max(fish_sz), 1)
 
-tmp = a.1 + b.1 + d.1 * size
+p.sz = sz[spp == 6]  # midge larvae
 
-
-p.sz = sz[spp==3]
-
-p.sz = seq(min(p.sz), max(p.sz), .1)[10:30]
-
+# cut this down a little for plotting
+p.sz = seq(min(p.sz), max(p.sz), .1)[40:60]
 
 out = list()
 
@@ -224,43 +198,27 @@ for(i in 1:length(p.sz)){
 
 all.out = do.call(rbind, out)
 
-
-library(tidyr)
-
+# format for presp3D
 test = select(all.out, fish_lab, p.sz, pred) %>%
-  spread(p.sz, pred)
-
+       spread(p.sz, pred)
 
 test2 = as.matrix(test[,-1])
 
+# standardize
 test3 = test2 / mean(test2)
 
-
-library(rgl)
-library(plot3D)
-windows(width = 6.5*1.5, height = 5*1.5, record = T, xpos = 25)
-
-
-
-
-plot3d(x = all.out$fish_lab, y = all.out$pred, z = all.out$p.sz)
-
-
-x = unique(all.out$fish_lab)
-y = unique(all.out$p.sz)
-
-
-
+# cut down a little for plotting
 sm = test3[seq(1, nrow(test3), by = 10),
            seq(1, ncol(test3), by = 1)]
 
 persp3D(z = sm, col = ramp.col(c("white", "blue")), border = "black",
-        bty = "b2",# ticktype = "detailed",resfac = 2,
+        bty = "b2",# ticktype = "detailed", resfac = 2,
         xlab = "Fish Size", ylab = "Prey Size",
         zlab = "Relative Selection",
-        # phi = 10)
         theta = 60, phi = 2, clab = NULL, cex.lab = 2)
-# shade = .25)
 
+#-----------------------------------------------------------------------------#
+# library(rgl)
+# plot3d(x = all.out$fish_lab, y = all.out$pred, z = all.out$p.sz)
 #-----------------------------------------------------------------------------#
 # End
