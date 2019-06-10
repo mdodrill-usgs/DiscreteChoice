@@ -24,10 +24,18 @@ name.key = data.frame(num = c(1:7),
 
 #-----------------------------------------------------------------------------#
 # 7 taxa models
+# runs = c("Model_Ind_v1_with_R2_Length_2000iter.RData",
+#          "Model_Ind_v1_with_R2_Width_2000iter.RData",
+#          "Model_Ind_v1_with_R2_Area_2000iter.RData",
+#          "Model_Ind_v1_with_R2_Mass_2000iter.RData")
+
 runs = c("Model_Ind_v1_with_R2_Length_2000iter.RData",
          "Model_Ind_v1_with_R2_Width_2000iter.RData",
          "Model_Ind_v1_with_R2_Area_2000iter.RData",
-         "Model_Ind_v1_with_R2_Mass_2000iter.RData")
+         "Model_Ind_v1_with_R2_Mass_2000iter.RData",
+         "Model_Ind_v1_with_R2_Hemi_A_2000iter.RData",
+         # "Model_Ind_v1_with_R2_Hemi_p_2000iter.RData",
+         "Model_Ind_v1_with_R2_Volume_2000iter.RData")
  
 # 6 taxa models
 runs = c("Model_Ind_v1_with_R2_Length_2000iter_with_All_RE_no_worm.RData",
@@ -69,31 +77,40 @@ all2 = group_by(all, model, variable) %>%
             upper = quantile(value, .975),
             lower = quantile(value, .025))
 
-tmp = rep(c("Area", "Length", "Mass", "Width"), each = 3)
+# tmp = rep(c("Area", "Length", "Mass", "Width"), each = 3)
+
+tmp = rep(c("Area", "Hemispherical\n Area", "Length", "Mass",
+            "Volume", "Width"), each = 3)
+
 all2$measure = factor(tmp,
-                       levels = c("Length", "Width", "Area", "Mass"),
+                       levels = c("Length", "Area", "Hemispherical\n Area",
+                                  "Mass", "Volume", "Width"),
                        ordered = TRUE)
 
 #-----------------------------------------------------------------------------#
-windows(width = 6.5*1.5, height = 5*1.5, record = T, xpos = 25)
+# windows(width = 6.5*1.5, height = 5*1.5, record = T, xpos = 25)
+windows(width = 3.4*2, height = 3.4*2, record = T, xpos = 25)
 
-all.ltl = all2[all2$variable != "R2_re",]
+all.ltl = all2[all2$variable == "R2_sp",]
 
-var.lab = ifelse(all.ltl$variable == "R2_sp", "Prey Size", "Prey and Fish Size")
+# var.lab = ifelse(all.ltl$variable == "R2_sp", "Prey Size", "Prey and Fish Size")
+# 
+# all.ltl$var.lab = factor(var.lab,
+#                          levels = c("Prey Size", "Prey and Fish Size"),
+#                          ordered = TRUE) 
 
-all.ltl$var.lab = factor(var.lab,
-                         levels = c("Prey Size", "Prey and Fish Size"),
-                         ordered = TRUE) 
-
-p = ggplot(all.ltl, aes(y = my.mean, x = var.lab)) +
+p = ggplot(all.ltl, aes(y = my.mean, x = measure)) +
     # geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-    geom_point(position = position_dodge(width = 1), aes(color = measure), size = 3) +
-    geom_errorbar(aes(ymin = lower, ymax = upper, color = measure),
+    # geom_point(position = position_dodge(width = 1), aes(color = measure), size = 3) +
+    geom_point(position = position_dodge(width = 1), color = "black", size = 3) +
+    # geom_errorbar(aes(ymin = lower, ymax = upper, color = measure),
+    geom_errorbar(aes(ymin = lower, ymax = upper), color = "black",
                   position = position_dodge(width = 1),
                   width = 0, size = 1) +
     scale_y_continuous(breaks = c(-.1, 0, .1, .2, .3, .4, .5)) +
-    scale_color_manual(values = c("black", "grey35", "gray50", "gray75")) +
-    labs(y = expression(paste('Pseudo R'^' 2',' (+ - 95% CRI)')), x = "", color = "") 
+    # scale_color_manual(values = c("black", "grey35", "gray50", "gray75")) +
+    labs(y = expression(paste('Pseudo R'^' 2',' (+ - 95% CRI)')), x = "", color = "") +
+    coord_flip()
 
 p1 = p + theme(axis.title.x = element_text(size = 24, vjust = -.1),
                axis.title.y = element_text(size = 24, vjust = 1),
@@ -106,7 +123,8 @@ p1 = p + theme(axis.title.x = element_text(size = 24, vjust = -.1),
                panel.spacing = unit(.8, "lines"),
                legend.text = element_text(size = 19),
                legend.key = element_rect(fill = "white"),
-               legend.position = c(.9, .95))
+               legend.position = "none")
+               # legend.position = c(.9, .95))
 p1
 
 #-----------------------------------------------------------------------------#
