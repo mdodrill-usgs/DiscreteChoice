@@ -212,13 +212,65 @@ sm = test3[seq(1, nrow(test3), by = 10),
            seq(1, ncol(test3), by = 1)]
 
 persp3D(z = sm, col = ramp.col(c("white", "blue")), border = "black",
-        bty = "b2",# ticktype = "detailed", resfac = 2,
+        bty = "b2", ticktype = "detailed", #resfac = 2,
         xlab = "Fish Size", ylab = "Prey Size",
         zlab = "Relative Selection",
         theta = 60, phi = 2, clab = NULL, cex.lab = 2)
 
+# axis(1, at = seq(0, 1, by = .1))
+
 #-----------------------------------------------------------------------------#
 # library(rgl)
 # plot3d(x = all.out$fish_lab, y = all.out$pred, z = all.out$p.sz)
+#-----------------------------------------------------------------------------#
+# make the plot with custom labels (see working_3D.R)
+
+par(xpd = TRUE)
+
+pmat = persp3D(z = sm, col = ramp.col(c("white", "blue")), border = "black",
+               bty = "b2",# ticktype = "detailed", #resfac = 2,
+               xlab = "Fish Size", ylab = "Prey Size",
+               zlab = "Relative Selection",
+               theta = 60, phi = 2, clab = NULL, cex.lab = 2,
+               axes = FALSE)
+
+x.axis <- seq(0,1,.2)
+min.x <- 0
+max.x <- 1
+y.axis <- seq(0,1,.25)
+min.y <- 0
+max.y <- 1
+z.axis <- seq(0, 10, by=2)
+min.z <- 0
+max.z <- 10
+
+tick.start <- trans3d(x.axis, min.y, min.z, pmat)
+tick.end <- trans3d(x.axis, (min.y - 0.05), min.z, pmat)
+segments(tick.start$x, tick.start$y, tick.end$x, tick.end$y)
+
+tick.start <- trans3d(max.x, y.axis, min.z, pmat)
+tick.end <- trans3d(max.x + 0.05, y.axis, min.z, pmat)
+segments(tick.start$x, tick.start$y, tick.end$x, tick.end$y)
+
+tick.start <- trans3d(min.x, min.y, z.axis, pmat)
+tick.end <- trans3d(min.x, (min.y - 0.05), z.axis, pmat)
+segments(tick.start$x, tick.start$y, tick.end$x, tick.end$y)
+
+
+labels <- c("50", "120", "190", "260", "330", "400")
+label.pos <- trans3d(x.axis, (min.y - 0.15), min.z, pmat)
+text(label.pos$x, label.pos$y, labels = labels, adj=c(0, NA), srt=0, cex=1.5)
+text(label.pos$x[1]-.02, label.pos$y[1]-.04, labels = "Fish Size (mm)", adj=c(0, NA), srt=302, cex=1.75)
+
+labels <- c("6", "6.5", "7", "7.5", "8")
+label.pos <- trans3d((max.x + 0.1), y.axis, min.z, pmat)
+text(label.pos$x, label.pos$y, labels=labels, adj=c(0, NA), cex=1.5)
+text(label.pos$x[1]+.35, label.pos$y[1]+.025, labels = "Prey Size (mm)", cex=1.75, srt = 16.25)
+
+labels <- c("", as.character(z.axis)[-1])
+label.pos <- trans3d(min.x, (min.y - 0.1), z.axis, pmat)
+text(label.pos$x, label.pos$y, labels=labels, adj=c(1, NA), cex=1.5)
+text(label.pos$x[4]-.06, label.pos$y[4]-.05, labels = "Rel. Selection", cex = 1.75, srt = 270)
+
 #-----------------------------------------------------------------------------#
 # End
